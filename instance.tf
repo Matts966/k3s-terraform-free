@@ -18,9 +18,14 @@ resource "google_compute_instance" "k3s" {
     }
   }
 
-  metadata_startup_script = <<EOT
-timedatectl set-timezone Asia/Tokyo
-EOT
+  metadata_startup_script = <<-EOT
+    timedatectl set-timezone Asia/Tokyo
+    sudo dd if=/dev/zero of=/swapfile bs=4M count=1000
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile
+    sudo swapon /swapfile
+    sudo su -c "echo '/swapfile none swap sw 0 0' >> /etc/fstab"
+  EOT
 
   network_interface {
     subnetwork = google_compute_subnetwork.subnet1.name
